@@ -57,17 +57,17 @@ end
 #   end
 # end
 
-Ransack::Nodes::Condition.class_eval do
-  alias_method :original_format_predicate, :format_predicate
+# Ransack::Nodes::Condition.class_eval do
+#   alias_method :original_format_predicate, :format_predicate
 
-  private
+#   private
 
-  # Original method doesn't respect the arity of expressions
-  # See: lib/ransack/adapters/active_record/ransack/nodes/condition.rb#L30-L42
-  def format_predicate(attribute)
-    original_format_predicate(attribute)
-  rescue ArgumentError
-    arel_pred = arel_predicate_for_attribute(attribute)
-    attribute.attr.public_send(arel_pred)
-  end
-end
+#   # Original method doesn't respect the arity of expressions
+#   # See: lib/ransack/adapters/active_record/ransack/nodes/condition.rb#L30-L42
+#   def format_predicate(attribute)
+#     original_format_predicate(attribute)
+#   rescue ArgumentError
+#     arel_pred = arel_predicate_for_attribute(attribute)
+#     attribute.attr.public_send(arel_pred)
+#   end
+# end
