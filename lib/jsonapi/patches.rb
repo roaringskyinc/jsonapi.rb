@@ -33,29 +33,29 @@ Ransack.configure do |config|
   )
 end
 
-Ransack::Visitor.class_eval do
-  alias_method :original_visit_Ransack_Nodes_Sort, :visit_Ransack_Nodes_Sort
+# Ransack::Visitor.class_eval do
+#   alias_method :original_visit_Ransack_Nodes_Sort, :visit_Ransack_Nodes_Sort
 
-  private
+#   private
 
-  # Original method assumes sorting is done only by attributes
-  def visit_Ransack_Nodes_Sort(node)
-    # Try the default sorting visitor method...
-    binded = original_visit_Ransack_Nodes_Sort(node)
-    valid = (binded.valid? if binded.respond_to?(:valid?)) || true
-    return binded if binded.present? && valid
+#   # Original method assumes sorting is done only by attributes
+#   def visit_Ransack_Nodes_Sort(node)
+#     # Try the default sorting visitor method...
+#     binded = original_visit_Ransack_Nodes_Sort(node)
+#     valid = (binded.valid? if binded.respond_to?(:valid?)) || true
+#     return binded if binded.present? && valid
 
-    # Fallback to support the expressions...
-    binded = Ransack::Nodes::Condition.extract(node.context, node.name, nil)
-    valid = (binded.valid? if binded.respond_to?(:valid?)) || true
-    return unless binded.present? && valid
+#     # Fallback to support the expressions...
+#     binded = Ransack::Nodes::Condition.extract(node.context, node.name, nil)
+#     valid = (binded.valid? if binded.respond_to?(:valid?)) || true
+#     return unless binded.present? && valid
 
-    arel_pred = binded.arel_predicate
-    # Remove any alias when sorting...
-    arel_pred.alias = nil if arel_pred.respond_to?(:alias=)
-    arel_pred.public_send(node.dir)
-  end
-end
+#     arel_pred = binded.arel_predicate
+#     # Remove any alias when sorting...
+#     arel_pred.alias = nil if arel_pred.respond_to?(:alias=)
+#     arel_pred.public_send(node.dir)
+#   end
+# end
 
 Ransack::Nodes::Condition.class_eval do
   alias_method :original_format_predicate, :format_predicate
