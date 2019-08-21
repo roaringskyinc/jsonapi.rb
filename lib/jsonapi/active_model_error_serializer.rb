@@ -19,7 +19,7 @@ module JSONAPI
       code = error_hash[:error] unless error_hash[:error].is_a?(Hash)
       code ||= error_hash[:message] || :invalid
       # `parameterize` separator arguments are different on Rails 4 vs 5...
-      code.to_s.delete("''").parameterize.gsub('-', '_')
+      code.to_s.delete("''").parameterize.tr('-', '_')
     end
 
     attribute :detail do |object, params|
@@ -32,7 +32,9 @@ module JSONAPI
           error_key, nil, error_hash[:error]
         )
       elsif error_hash[:error].present?
-        message = errors_object.generate_message(error_key, error_hash[:error])
+        message = errors_object.generate_message(
+          error_key, error_hash[:error], error_hash
+        )
       else
         message = error_hash[:message]
       end

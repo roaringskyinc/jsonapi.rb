@@ -22,7 +22,6 @@ module JSONAPI
     end
 
     private
-
     # Applies filtering and sorting to a set of resources if requested
     #
     # The fields follow [Ransack] specifications.
@@ -57,7 +56,9 @@ module JSONAPI
         field_names, predicates = JSONAPI::Filtering
           .extract_attributes_and_predicates(requested_field)
 
-        if to_filter.is_a?(String) && to_filter.include?(',')
+        wants_array = predicates.any? && predicates.map(&:wants_array).any?
+
+        if to_filter.is_a?(String) && wants_array
           to_filter = to_filter.split(',')
         end
 

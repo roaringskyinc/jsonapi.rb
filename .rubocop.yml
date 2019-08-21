@@ -2,6 +2,11 @@ inherit_gem:
   rubocop-rails_config:
     - config/rails.yml
 
+require: rubocop-performance
+
+Performance:
+  Enabled: true
+
 Rails:
   Enabled: true
 
@@ -20,3 +25,9 @@ Layout/IndentationConsistency:
 
 Style/BlockDelimiters:
   Enabled: true
+
+Rails/ApplicationRecord:
+  Enabled: false
+
+Rails/BelongsTo:
+  Enabled: false

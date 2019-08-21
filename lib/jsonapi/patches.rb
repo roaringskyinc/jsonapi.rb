@@ -36,14 +36,13 @@ end
 # Ransack::Visitor.class_eval do
 #   alias_method :original_visit_Ransack_Nodes_Sort, :visit_Ransack_Nodes_Sort
 
-#   private
-
-#   # Original method assumes sorting is done only by attributes
-#   def visit_Ransack_Nodes_Sort(node)
-#     # Try the default sorting visitor method...
-#     binded = original_visit_Ransack_Nodes_Sort(node)
-#     valid = (binded.valid? if binded.respond_to?(:valid?)) || true
-#     return binded if binded.present? && valid
+  private
+  # Original method assumes sorting is done only by attributes
+  def visit_Ransack_Nodes_Sort(node)
+    # Try the default sorting visitor method...
+    binded = original_visit_Ransack_Nodes_Sort(node)
+    valid = (binded.valid? if binded.respond_to?(:valid?)) || true
+    return binded if binded.present? && valid
 
 #     # Fallback to support the expressions...
 #     binded = Ransack::Nodes::Condition.extract(node.context, node.name, nil)
@@ -60,14 +59,13 @@ end
 # Ransack::Nodes::Condition.class_eval do
 #   alias_method :original_format_predicate, :format_predicate
 
-#   private
-
-#   # Original method doesn't respect the arity of expressions
-#   # See: lib/ransack/adapters/active_record/ransack/nodes/condition.rb#L30-L42
-#   def format_predicate(attribute)
-#     original_format_predicate(attribute)
-#   rescue ArgumentError
-#     arel_pred = arel_predicate_for_attribute(attribute)
-#     attribute.attr.public_send(arel_pred)
-#   end
-# end
+  private
+  # Original method doesn't respect the arity of expressions
+  # See: lib/ransack/adapters/active_record/ransack/nodes/condition.rb#L30-L42
+  def format_predicate(attribute)
+    original_format_predicate(attribute)
+  rescue ArgumentError
+    arel_pred = arel_predicate_for_attribute(attribute)
+    attribute.attr.public_send(arel_pred)
+  end
+end

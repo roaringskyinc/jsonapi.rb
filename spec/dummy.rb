@@ -35,6 +35,7 @@ end
 
 class Note < ActiveRecord::Base
   validates_format_of :title, without: /BAD_TITLE/
+  validates_numericality_of :quantity, less_than: 100, if: :quantity?
   belongs_to :user, required: true
 end
 
@@ -43,18 +44,27 @@ class CustomNoteSerializer
 
   set_type :note
   belongs_to :user
-  attributes(:title, :created_at, :updated_at)
+  attributes(:title, :quantity, :created_at, :updated_at)
 end
 
 class UserSerializer
   include FastJsonapi::ObjectSerializer
 
   has_many :notes, serializer: CustomNoteSerializer
-  attributes(:first_name, :last_name, :created_at, :updated_at)
+  attributes(:last_name, :created_at, :updated_at)
+
+  attribute :first_name do |object, params|
+    if params[:first_name_upcase]
+      object.first_name.upcase
+    else
+      object.first_name
+    end
+  end
 end
 
 class Dummy < Rails::Application
   secrets.secret_key_base = '_'
+  config.hosts << 'www.example.com' if config.respond_to?(:hosts)
 
   routes.draw do
     scope defaults: { format: :jsonapi } do
@@ -68,6 +78,7 @@ class UsersController < ActionController::Base
   include JSONAPI::Fetching
   include JSONAPI::Filtering
   include JSONAPI::Pagination
+  include JSONAPI::Deserialization
 
   def index
     allowed_fields = [
@@ -93,17 +104,23 @@ class UsersController < ActionController::Base
   end
 
   private
-
   def jsonapi_meta(resources)
     {
       many: true,
       pagination: jsonapi_pagination_meta(resources)
     }
   end
+
+  def jsonapi_serializer_params
+    {
+      first_name_upcase: params[:upcase]
+    }
+  end
 end
 
 class NotesController < ActionController::Base
   include JSONAPI::Errors
+  include JSONAPI::Deserialization
 
   def update
     raise_error! if params[:id] == 'tada'
@@ -120,7 +137,6 @@ class NotesController < ActionController::Base
   end
 
   private
-
   def render_jsonapi_internal_server_error(exception)
     Rails.logger.error(exception)
     super(exception)
@@ -135,10 +151,10 @@ class NotesController < ActionController::Base
   end
 
   def note_params
-    {
-      title: params.require(:data).require(:attributes).require(:title),
-      user_id: params.dig(:data, :relationships, :user, :id)
-    }
+    # Will trigger required attribute error handling
+    params.require(:data).require(:attributes).require(:title)
+
+    jsonapi_deserialize(params)
   end
 
   def jsonapi_meta(resources)

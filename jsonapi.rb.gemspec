@@ -26,13 +26,15 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'rack'
 
   spec.add_development_dependency 'bundler'
-  spec.add_development_dependency 'rails'
-  spec.add_development_dependency 'sqlite3', '~> 1.3.6'
+  spec.add_development_dependency 'rails', ENV['RAILS_VERSION']
+  spec.add_development_dependency 'sqlite3', ENV['SQLITE3_VERSION']
   spec.add_development_dependency 'ffaker'
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'rspec-rails'
   spec.add_development_dependency 'jsonapi-rspec'
   spec.add_development_dependency 'yardstick'
-  spec.add_development_dependency 'rubocop-rails_config'
+  spec.add_development_dependency 'rubocop-rails_config', '0.6.2'
+  spec.add_development_dependency 'rubocop', '0.71.0'
   spec.add_development_dependency 'simplecov'
+  spec.add_development_dependency 'rubocop-performance'
 end

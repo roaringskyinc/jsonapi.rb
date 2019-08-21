@@ -10,7 +10,7 @@ RSpec.describe NotesController, type: :request do
       {
         data: {
           attributes: { title: FFaker::Company.name },
-          relationships: { user: { id: user_id } }
+          relationships: { user: { data: { id: user_id } } }
         }
       }
     end
@@ -43,7 +43,7 @@ RSpec.describe NotesController, type: :request do
     context 'with an invalid payload' do
       let(:params) do
         payload = note_params.dup
-        payload[:data][:relationships][:user][:id] = nil
+        payload[:data][:relationships][:user][:data][:id] = nil
         payload
       end
 
@@ -64,12 +64,13 @@ RSpec.describe NotesController, type: :request do
         let(:params) do
           payload = note_params.dup
           payload[:data][:attributes][:title] = 'BAD_TITLE'
+          payload[:data][:attributes][:quantity] = 100 + rand(10)
           payload
         end
 
         it do
           expect(response).to have_http_status(:unprocessable_entity)
-          expect(response_json['errors'].size).to eq(2)
+          expect(response_json['errors'].size).to eq(3)
           expect(response_json['errors'][0]['status']).to eq('422')
           expect(response_json['errors'][0]['code']).to include('invalid')
           expect(response_json['errors'][0]['title'])
@@ -81,7 +82,7 @@ RSpec.describe NotesController, type: :request do
 
           expect(response_json['errors'][1]['status']).to eq('422')
 
-          if Rails::VERSION::MAJOR == 5
+          if Rails::VERSION::MAJOR >= 5
             expect(response_json['errors'][1]['code']).to eq('invalid')
           else
             expect(response_json['errors'][1]['code']).to eq('has_typos')
@@ -93,14 +94,31 @@ RSpec.describe NotesController, type: :request do
             .to eq('pointer' => '/data/attributes/title')
           expect(response_json['errors'][1]['detail'])
             .to eq('Title has typos')
+
+          expect(response_json['errors'][2]['status']).to eq('422')
+
+          if Rails::VERSION::MAJOR >= 5
+            expect(response_json['errors'][2]['code']).to eq('less_than')
+          else
+            expect(response_json['errors'][2]['code'])
+              .to eq('must_be_less_than_100')
+          end
+
+          expect(response_json['errors'][2]['title'])
+            .to eq(Rack::Utils::HTTP_STATUS_CODES[422])
+          expect(response_json['errors'][2]['source'])
+            .to eq('pointer' => '/data/attributes/quantity')
+          expect(response_json['errors'][2]['detail'])
+            .to eq('Quantity must be less than 100')
         end
       end
 
       context 'as a param attribute' do
         let(:params) do
           payload = note_params.dup
-          payload[:data][:attributes][:created_at] = nil
           payload[:data][:attributes].delete(:title)
+          # To have any attribtues in the payload...
+          payload[:data][:attributes][:created_at] = nil
           payload
         end
 

@@ -67,6 +67,17 @@ Or install it yourself as:
 
 ## Usage
 
+ * [Object serialization](#object-serialization)
+ * [Collection meta](#collection-meta)
+ * [Error handling](#error-handling)
+ * [Includes and sparse fields](#includes-and-sparse-fields)
+ * [Filtering and sorting](#filtering-and-sorting)
+   * [Sorting using expressions](#sorting-using-expressions)
+ * [Pagination](#pagination)
+ * [Deserialization](#deserialization)
+
+---
+
 To enable the support for Rails, add this to an initializer:
 
 ```ruby
@@ -79,7 +90,7 @@ JSONAPI::Rails.install!
 This will register the mime type and the `jsonapi` and `jsonapi_errors`
 renderers.
 
-### Object Serialization
+### Object serialization
 
 The `jsonapi` renderer will try to guess and resolve the serializer class based
 on the object class, and if it is a collection, based on the first item in the
@@ -111,7 +122,26 @@ class CustomNamingController < ActionController::Base
 end
 ```
 
-#### Collection Meta
+To provide extra parameters to the serializer,
+implement the `jsonapi_serializer_params` method.
+
+Here's an example:
+```ruby
+class CustomSerializerParamsController < ActionController::Base
+
+  # ...
+
+  private
+
+  def jsonapi_serializer_params
+    {
+      first_name_upcase: params[:upcase].present?
+    }
+  end
+end
+```
+
+#### Collection meta
 
 To provide meta information for a collection, provide the `jsonapi_meta`
 controller method.
@@ -187,7 +217,7 @@ class MyController < ActionController::Base
   private
 
   # Overwrite/whitelist the includes
-  def jsonapi_include(resources)
+  def jsonapi_include
     super & ['wanted_attribute']
   end
 end
@@ -274,7 +304,37 @@ use the `jsonapi_pagination_meta` method:
 
     { pagination: pagination } if pagination.present?
   end
+
 ```
+### Deserialization
+
+`JSONAPI::Deserialization` provides a helper to transform a `JSONAPI` document
+into a flat dictionary that can be used to update an `ActiveRecord::Base` model.
+
+Here's an example using the `jsonapi_deserialize` helper:
+
+```ruby
+class MyController < ActionController::Base
+  include JSONAPI::Deserialization
+
+  def update
+    model = MyModel.find(params[:id])
+
+    if model.update(jsonapi_deserialize(only: [:attr1, :rel_one]))
+      render jsonapi: model
+    else
+      render jsonapi_errors: model.errors, status: :unprocessable_entity
+    end
+  end
+end
+```
+
+The `jsonapi_deserialize` helper accepts the following options:
+
+ * `only`: returns exclusively attributes/relationship data in the provided list
+ * `except`: returns exclusively attributes/relationship which are not in the list
+ * `polymorphic`: will add and detect the `_type` attribute and class to the
+   defined list of polymorphic relationships
 
 ## Development
 
