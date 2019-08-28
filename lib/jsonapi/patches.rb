@@ -33,7 +33,10 @@ Ransack.configure do |config|
   )
 end
 
-puts Ransack::Visitor.class_eval
+puts Ransack::Visitor.class_eval do |test|
+  puts test
+end
+
 
 # Ransack::Visitor.class_eval do
 #   alias_method :original_visit_Ransack_Nodes_Sort, :visit_Ransack_Nodes_Sort
