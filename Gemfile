@@ -4,3 +4,4 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'jsonapi-rspec', git: 'https://github.com/stas/jsonapi-rspec.git'
+gem 'ransack-mongoid', github: 'activerecord-hackery/ransack-mongoid'
