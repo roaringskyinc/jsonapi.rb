@@ -24,7 +24,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'fast_jsonapi', '~> 1.5'
   spec.add_dependency 'ransack'
   spec.add_dependency 'rack'
-  spec.add_dependency 'ransack-mongoid'
 
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'rails', ENV['RAILS_VERSION']

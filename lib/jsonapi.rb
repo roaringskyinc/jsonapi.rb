@@ -5,6 +5,7 @@ require 'jsonapi/pagination'
 require 'jsonapi/deserialization'
 require 'jsonapi/rails'
 require 'jsonapi/version'
+require 'ransack-mongoid'
 
 # JSON:API
 module JSONAPI
