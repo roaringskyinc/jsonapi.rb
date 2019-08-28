@@ -71,7 +71,21 @@ Ransack::Visitor.class_eval do
 end
 
 Ransack::Nodes::Condition.class_eval do
-  # alias_method :original_format_predicate, :format_predicate
+  def format_predicate(attribute)
+    arel_pred = arel_predicate_for_attribute(attribute)
+    arel_values = formatted_values_for_attribute(attribute)
+    predicate = attribute.attr.public_send(arel_pred, arel_values)
+
+    if in_predicate?(predicate)
+      predicate.right = predicate.right.map do |pr|
+        casted_array?(pr) ? format_values_for(pr) : pr
+      end
+    end
+
+    predicate
+  end
+
+  alias_method :original_format_predicate, :format_predicate
 
   private
   # Original method doesn't respect the arity of expressions
