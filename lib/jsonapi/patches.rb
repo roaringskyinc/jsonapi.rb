@@ -33,12 +33,7 @@ Ransack.configure do |config|
   )
 end
 
-puts Ransack::Visitor.class_eval do |test|
-  puts test
-end
-
-
-# Ransack::Visitor.class_eval do
+Ransack::Visitor.class_eval do
 #   alias_method :original_visit_Ransack_Nodes_Sort, :visit_Ransack_Nodes_Sort
 
   private
@@ -59,9 +54,9 @@ end
 #     arel_pred.alias = nil if arel_pred.respond_to?(:alias=)
 #     arel_pred.public_send(node.dir)
 #   end
-# end
+end
 
-# Ransack::Nodes::Condition.class_eval do
+Ransack::Nodes::Condition.class_eval do
 #   alias_method :original_format_predicate, :format_predicate
 
   private
