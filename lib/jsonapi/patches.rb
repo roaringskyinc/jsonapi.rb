@@ -34,7 +34,21 @@ Ransack.configure do |config|
 end
 
 Ransack::Visitor.class_eval do
-#   alias_method :original_visit_Ransack_Nodes_Sort, :visit_Ransack_Nodes_Sort
+  def visit_Ransack_Nodes_Sort(object)
+    if object.valid?
+      if object.attr.is_a?(Arel::Attributes::Attribute)
+        object.attr.send(object.dir)
+      else
+        ordered(object)
+      end
+    else
+      scope_name = :"sort_by_#{object.name}_#{object.dir}"
+      scope_name if object.context.object.respond_to?(scope_name)
+    end
+  end
+
+  alias_method :original_visit_Ransack_Nodes_Sort, :visit_Ransack_Nodes_Sort
+
 
   private
   # Original method assumes sorting is done only by attributes
