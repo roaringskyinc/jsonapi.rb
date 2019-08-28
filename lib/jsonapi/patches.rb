@@ -57,7 +57,7 @@ Ransack::Visitor.class_eval do
 end
 
 Ransack::Nodes::Condition.class_eval do
-  alias_method :original_format_predicate, :format_predicate
+  # alias_method :original_format_predicate, :format_predicate
 
   private
   # Original method doesn't respect the arity of expressions
