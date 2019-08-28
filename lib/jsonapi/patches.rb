@@ -53,7 +53,7 @@ Ransack::Visitor.class_eval do
 #     # Remove any alias when sorting...
 #     arel_pred.alias = nil if arel_pred.respond_to?(:alias=)
 #     arel_pred.public_send(node.dir)
-#   end
+  end
 end
 
 Ransack::Nodes::Condition.class_eval do
