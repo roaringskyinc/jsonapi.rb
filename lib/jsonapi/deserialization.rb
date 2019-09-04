@@ -31,6 +31,9 @@ module JSONAPI
         options[opt_name] = Array(opt_value).map(&:to_s) if opt_value
       end
 
+      # Convert primary_data to snake_case
+      primary_data.deep_transform_keys!(&:underscore)
+
       relationships = primary_data['relationships'] || {}
       parsed = primary_data['attributes'] || {}
       parsed['id'] = primary_data['id'] if primary_data['id']
@@ -59,7 +62,8 @@ module JSONAPI
         end
       end
 
-      parsed
+      # Convert to symbols before returning to client
+      parsed.deep_transform_keys!(&:to_sym)
     end
   end
 end
