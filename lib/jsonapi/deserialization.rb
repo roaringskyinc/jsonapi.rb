@@ -48,7 +48,7 @@ module JSONAPI
       parsed['platform'] = primary_data['platform'] if primary_data['platform']
 
       if primary_data['data']
-        relationships = primary_data['relationships'] || {}
+        relationships = primary_data['data']['relationships'] || {}
         parsed['id'] = primary_data['id'] if primary_data['id']
 
         # Map primary_data['data']['attributes'] to parsed hash
