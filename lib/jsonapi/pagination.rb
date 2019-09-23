@@ -11,15 +11,27 @@ module JSONAPI
     #
     # @return [ActiveRecord::Base] a collection of resources
     def jsonapi_paginate(resources)
+      @page_length = resources.size ? resources.size : self.class.const_get(:JSONAPI_PAGE_SIZE).to_i
       offset, limit, _ = jsonapi_pagination_params
 
-      if resources.respond_to?(:offset)
-        resources = resources.offset(offset).limit(limit)
+      # If resources is a collection, only subset resources if the size of the collection is greater than the step size
+      if resources.respond_to?(:size)
+        if resources.size > limit
+          resources = subset(resources, offset, limit)
+        end
       else
-        resources = resources[(offset)..(offset + limit)]
+        resources = subset(resources, offset, limit)
       end
 
       block_given? ? yield(resources) : resources
+    end
+
+    def subset(resources, offset, limit)
+      if resources.respond_to?(:offset)
+        return resources.offset(offset).limit(limit)
+      else
+        return resources[(offset)..(offset + limit)]
+      end
     end
 
     # Generates the pagination links
@@ -83,7 +95,7 @@ module JSONAPI
     #
     # @return [Array] with the offset, limit and the current page number
     def jsonapi_pagination_params
-      def_per_page = self.class.const_get(:JSONAPI_PAGE_SIZE).to_i
+      def_per_page = @page_length
 
       pagination = params[:page].try(:slice, :number, :size) || {}
       per_page = pagination[:size].to_f.to_i
