@@ -94,7 +94,6 @@ module JSONAPI
           options[opt] ||= send(method_name) if respond_to?(method_name, true)
         end
 
-        puts respond_to?(:jsonapi_serializer_class, true)
         if respond_to?(:jsonapi_serializer_class, true)
           serializer_class = jsonapi_serializer_class(resource, many)
         else

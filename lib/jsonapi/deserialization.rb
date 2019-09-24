@@ -35,9 +35,6 @@ module JSONAPI
         return {}
       end
 
-      # Convert primary_data to snake_case
-      primary_data.deep_transform_keys!(&:underscore)
-
       # This is the hash that is going to be returned
       parsed = {}
       parsed['include'] = primary_data['include'] if primary_data['include']
@@ -47,13 +44,16 @@ module JSONAPI
       parsed['page'] = primary_data['page'] if primary_data['page']
       parsed['platform'] = primary_data['platform'] if primary_data['platform']
 
-      if primary_data['data']
-        relationships = primary_data['data']['relationships'] || {}
-        parsed['id'] = primary_data['id'] if primary_data['id']
+      # Convert primary_data to snake_case
+      _primary_data = primary_data.deep_transform_keys(&:underscore)
 
-        # Map primary_data['data']['attributes'] to parsed hash
-        if primary_data['data']['attributes'].respond_to? :each
-          primary_data['data']['attributes'].each do |key, val|
+      if _primary_data['data']
+        relationships = _primary_data['data']['relationships'] || {}
+        parsed['id'] = _primary_data['id'] if _primary_data['id']
+
+        # Map _primary_data['data']['attributes'] to parsed hash
+        if _primary_data['data']['attributes'].respond_to? :each
+          _primary_data['data']['attributes'].each do |key, val|
             parsed[key] = val
           end
         end
