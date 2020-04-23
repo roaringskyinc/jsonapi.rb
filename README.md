@@ -320,7 +320,7 @@ class MyController < ActionController::Base
   def update
     model = MyModel.find(params[:id])
 
-    if model.update(jsonapi_deserialize(only: [:attr1, :rel_one]))
+    if model.update(jsonapi_deserialize(params, only: [:attr1, :rel_one]))
       render jsonapi: model
     else
       render jsonapi_errors: model.errors, status: :unprocessable_entity
@@ -335,6 +335,12 @@ The `jsonapi_deserialize` helper accepts the following options:
  * `except`: returns exclusively attributes/relationship which are not in the list
  * `polymorphic`: will add and detect the `_type` attribute and class to the
    defined list of polymorphic relationships
+
+This functionality requires support for _inflections_. If your project uses
+`active_support` or `rails` you don't need to do anything. Alternatively, we will
+try to load a lightweight alternative to `active_support/inflector` provided
+by the `dry/inflector` gem, please make sure it's added if you want to benefit
+from this feature.
 
 ## Development
 

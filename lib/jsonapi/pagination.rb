@@ -20,7 +20,12 @@ module JSONAPI
           resources = subset(resources, offset, limit)
         end
       else
-        resources = subset(resources, offset, limit)
+        # resources = subset(resources, offset, limit)
+        original_size = resources.size
+        resources = resources[(offset)..(offset + limit - 1)] || []
+
+        # Cache the original resources size to be used for pagination meta
+        resources.instance_variable_set(:@original_size, original_size)
       end
 
       block_given? ? yield(resources) : resources
@@ -38,16 +43,16 @@ module JSONAPI
     #
     # @return [Array]
     def jsonapi_pagination(resources)
-      links = { self: request.base_url + request.original_fullpath }
+      links = { self: request.base_url + request.fullpath }
       pagination = jsonapi_pagination_meta(resources)
 
       return links if pagination.blank?
 
       original_params = params.except(
-        *request.path_parameters.keys.map(&:to_s)
-      ).to_unsafe_h.with_indifferent_access
+        *jsonapi_path_parameters.keys.map(&:to_s)
+      ).as_json.with_indifferent_access
 
-      original_params[:page] ||= {}
+      original_params[:page] = original_params[:page].dup || {}
       original_url = request.base_url + request.path + '?'
 
       pagination.each do |page_name, number|
@@ -71,9 +76,11 @@ module JSONAPI
       numbers = { current: page }
 
       if resources.respond_to?(:unscope)
-        total = resources.unscope(:limit, :offset).count()
+        total = resources.unscope(:limit, :offset, :order).count()
       else
-        total = resources.size
+        # Try to fetch the cached size first
+        total = resources.instance_variable_get(:@original_size)
+        total ||= resources.size
       end
 
       last_page = [1, (total.to_f / limit).ceil].max
@@ -103,6 +110,15 @@ module JSONAPI
       num = [1, pagination[:number].to_f.to_i].max
 
       [(num - 1) * per_page, per_page, num]
+    end
+
+    # Fallback to Rack's parsed query string when Rails is not available
+    #
+    # @return [Hash]
+    def jsonapi_path_parameters
+      return request.path_parameters if request.respond_to?(:path_parameters)
+
+      request.send(:parse_query, request.query_string, '&;')
     end
   end
 end
