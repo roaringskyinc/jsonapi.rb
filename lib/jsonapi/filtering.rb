@@ -54,6 +54,14 @@ module JSONAPI
       filtered = {}
       requested = params[:filter] || {}
       allowed_fields = allowed_fields.map(&:to_s)
+      puts 'requested'
+      puts requested
+
+      puts 'allowed'
+      puts allowed_fields
+
+      puts 'filtered'
+      puts filtered
 
       requested.each_pair do |requested_field, to_filter|
         field_names, predicates = JSONAPI::Filtering
@@ -69,7 +77,8 @@ module JSONAPI
           filtered[requested_field] = to_filter
         end
       end
-
+      puts 'filtered 2'
+      puts filtered
       filtered
     end
 
