@@ -36,13 +36,7 @@ end
 
 Ransack::Visitor.class_eval do
   def visit_Ransack_Nodes_Sort(object)
-    if object.valid?
-      if object.attr.is_a?(Arel::Attributes::Attribute)
-        object.attr.send(object.dir)
-      else
-        ordered(object)
-      end
-    else
+      return object.attr.send(object.dir) if object.valid?
       scope_name = :"sort_by_#{object.name}_#{object.dir}"
       scope_name if object.context.object.respond_to?(scope_name)
     end
