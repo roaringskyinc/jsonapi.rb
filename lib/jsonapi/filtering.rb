@@ -33,9 +33,12 @@ module JSONAPI
     # @param options [Hash] extra flags to enable/disable features
     # @return [ActiveRecord::Base] a collection of resources
     def jsonapi_filter(resources, allowed_fields, options = {})
+      puts resources
+      puts allowed_fields
       allowed_fields = allowed_fields.map(&:to_s)
       extracted_params = jsonapi_filter_params(allowed_fields)
       extracted_params[:sorts] = jsonapi_sort_params(allowed_fields, options)
+      puts extracted_params
       resources = resources.ransack(extracted_params)
       block_given? ? yield(resources) : resources
     end
