@@ -39,7 +39,6 @@ Ransack::Visitor.class_eval do
       return object.attr.send(object.dir) if object.valid?
       scope_name = :"sort_by_#{object.name}_#{object.dir}"
       scope_name if object.context.object.respond_to?(scope_name)
-    end
   end
 
   alias_method :original_visit_Ransack_Nodes_Sort, :visit_Ransack_Nodes_Sort
