@@ -98,11 +98,24 @@ module JSONAPI
       numbers
     end
 
+    # # Extracts the pagination params
+    # #
+    # # @return [Array] with the offset, limit and the current page number
+    # def jsonapi_pagination_params
+    #   def_per_page = @page_length
+
+    #   pagination = params[:page].try(:slice, :number, :size) || {}
+    #   per_page = pagination[:size].to_f.to_i
+    #   per_page = def_per_page if per_page > def_per_page || per_page < 1
+    #   num = [1, pagination[:number].to_f.to_i].max
+
+    #   [(num - 1) * per_page, per_page, num]
+    # end
     # Extracts the pagination params
     #
     # @return [Array] with the offset, limit and the current page number
     def jsonapi_pagination_params
-      def_per_page = @page_length
+      def_per_page = self.class.const_get(:JSONAPI_PAGE_SIZE).to_i
 
       pagination = params[:page].try(:slice, :number, :size) || {}
       per_page = pagination[:size].to_f.to_i
