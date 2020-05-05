@@ -1,4 +1,5 @@
 require 'ransack'
+require 'arel'
 
 Ransack.configure do |config|
   # Raise errors if a query contains an unknown predicate or attribute.
@@ -33,74 +34,22 @@ Ransack.configure do |config|
   )
 end
 
-# Ransack::Visitor.class_eval do
-#   def visit_Ransack_Nodes_Sort(object)
-#     if object.valid?
-#       if object.attr.is_a?(Arel::Attributes::Attribute)
-#         object.attr.send(object.dir)
-#       else
-#         ordered(object)
-#       end
-#     else
-#       scope_name = :"sort_by_#{object.name}_#{object.dir}"
-#       scope_name if object.context.object.respond_to?(scope_name)
-#     end
-#   end
-
-#   alias_method :original_visit_Ransack_Nodes_Sort, :visit_Ransack_Nodes_Sort
-
-
-#   private
-#   # Original method assumes sorting is done only by attributes
-#   def visit_Ransack_Nodes_Sort(node)
-#     # Try the default sorting visitor method...
-#     binded = original_visit_Ransack_Nodes_Sort(node)
-#     valid = (binded.valid? if binded.respond_to?(:valid?)) || true
-#     return binded if binded.present? && valid
-
-#     # Fallback to support the expressions...
-#     binded = Ransack::Nodes::Condition.extract(node.context, node.name, nil)
-#     valid = (binded.valid? if binded.respond_to?(:valid?)) || true
-#     return unless binded.present? && valid
-
-#     arel_pred = binded.arel_predicate
-#     # Remove any alias when sorting...
-#     arel_pred.alias = nil if arel_pred.respond_to?(:alias=)
-#     arel_pred.public_send(node.dir)
-#   end
-# end
-
-# Ransack::Nodes::Condition.class_eval do
-#   def format_predicate(attribute)
-#     arel_pred = arel_predicate_for_attribute(attribute)
-#     arel_values = formatted_values_for_attribute(attribute)
-#     predicate = attribute.attr.public_send(arel_pred, arel_values)
-
-#     if in_predicate?(predicate)
-#       predicate.right = predicate.right.map do |pr|
-#         casted_array?(pr) ? format_values_for(pr) : pr
-#       end
-#     end
-
-#     predicate
-#   end
-
-#   alias_method :original_format_predicate, :format_predicate
-
-#   private
-#   # Original method doesn't respect the arity of expressions
-#   # See: lib/ransack/adapters/active_record/ransack/nodes/condition.rb#L30-L42
-#   def format_predicate(attribute)
-#     original_format_predicate(attribute)
-#   rescue ArgumentError
-#     arel_pred = arel_predicate_for_attribute(attribute)
-#     attribute.attr.public_send(arel_pred)
-#   end
-# end
-
-
 Ransack::Visitor.class_eval do
+  def visit_Ransack_Nodes_Sort(object)
+    if object.valid?
+      if object.attr.is_a?(Arel::Attributes::Attribute)
+        object.attr.send(object.dir)
+      else
+        ordered(object)
+      end
+    else
+      scope_name = :"sort_by_#{object.name}_#{object.dir}"
+      scope_name if object.context.object.respond_to?(scope_name)
+    end
+  end
+
   alias_method :original_visit_Ransack_Nodes_Sort, :visit_Ransack_Nodes_Sort
+
 
   private
   # Original method assumes sorting is done only by attributes
@@ -123,6 +72,20 @@ Ransack::Visitor.class_eval do
 end
 
 Ransack::Nodes::Condition.class_eval do
+  def format_predicate(attribute)
+    arel_pred = arel_predicate_for_attribute(attribute)
+    arel_values = formatted_values_for_attribute(attribute)
+    predicate = attribute.attr.public_send(arel_pred, arel_values)
+
+    if in_predicate?(predicate)
+      predicate.right = predicate.right.map do |pr|
+        casted_array?(pr) ? format_values_for(pr) : pr
+      end
+    end
+
+    predicate
+  end
+
   alias_method :original_format_predicate, :format_predicate
 
   private
