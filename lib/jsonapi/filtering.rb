@@ -78,6 +78,9 @@ module JSONAPI
           filtered[requested_field] = to_filter
         end
       end
+      if requested['m']
+        filtered['m'] = requested['m']
+      end
       puts 'filtered 2'
       puts filtered
       filtered
