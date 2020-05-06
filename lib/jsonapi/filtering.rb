@@ -38,12 +38,9 @@ module JSONAPI
       allowed_fields = allowed_fields.map(&:to_s)
       extracted_params = jsonapi_filter_params(allowed_fields)
       extracted_params[:sorts] = jsonapi_sort_params(allowed_fields, options)
+      puts 'extracted_params'
       puts extracted_params
-      if options.or == true
-        resources = resources.ransack(extracted_params.try(:merge, m: 'or'))
-      else
-        resources = resources.ransack(extracted_params)
-      end
+      resources = resources.ransack(extracted_params)
       block_given? ? yield(resources) : resources
     end
 
